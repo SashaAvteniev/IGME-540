@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Game.h"
 #include "Graphics.h"
 #include "Vertex.h"
@@ -269,15 +270,32 @@ void ImGUIUpdate(float deltaTime)
 	Input::SetKeyboardCapture(io.WantCaptureKeyboard);
 	Input::SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 }
 
+void Game::BuildUI() {
+	ImGui::Begin("Starter Window");
+
+	ImGui::Text("App Details");
+	float framerate = ImGui::GetIO().Framerate;
+	ImGui::Text("Frame rate: %f fps", framerate);
+	ImGui::Text("Window Client Size: %dx%d", Window::Width(), Window::Height());
+	ImGui::ColorEdit4("Background Color", &backgroundColor[0]);
+
+	if (ImGui::Button("Show Demo Window")) {
+		ImGui::ShowDemoWindow();
+	}
+	ImGui:: End();
+	
+
+}
 // --------------------------------------------------------
 // Update your game here - user input, move objects, AI, etc.
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
 	ImGUIUpdate(deltaTime);
+	BuildUI();
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
@@ -294,7 +312,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erase what's on screen) and depth buffer
-		const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
+		const float color[4] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
 		Graphics::Context->ClearRenderTargetView(Graphics::BackBufferRTV.Get(),	color);
 		Graphics::Context->ClearDepthStencilView(Graphics::DepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}

@@ -16,9 +16,10 @@ public:
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
 	void OnResize();
-
+	void BuildUI();
 private:
 
+	float backgroundColor[4];
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
 	void CreateGeometry();
@@ -36,5 +37,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+
+
 };
 

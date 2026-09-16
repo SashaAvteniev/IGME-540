@@ -283,8 +283,16 @@ void Game::BuildUI() {
 	ImGui::ColorEdit4("Background Color", &backgroundColor[0]);
 
 	if (ImGui::Button("Show Demo Window")) {
+		showDefault = !showDefault;
+	}
+	if (showDefault) {
 		ImGui::ShowDemoWindow();
 	}
+	if(ImGui::CollapsingHeader("Rest of work")) {
+		ImGui::InputText("Input", starting, IM_ARRAYSIZE(starting));
+		ImGui::SliderFloat3("Position", positionVector, -10.f, 10.0f);
+	}
+
 	ImGui:: End();
 	
 

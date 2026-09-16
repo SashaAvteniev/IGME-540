@@ -20,6 +20,9 @@ public:
 private:
 
 	float backgroundColor[4];
+	bool showDefault = true;
+	float positionVector[3] = { 0,0,0 };
+	char starting[256] = "Textbox";
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
 	void CreateGeometry();

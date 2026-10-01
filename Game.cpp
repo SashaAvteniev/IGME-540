@@ -6,7 +6,7 @@
 #include "PathHelpers.h"
 #include "Window.h"
 #include "Mesh.h"
-
+#include "BufferStructs.h"
 
 #include <DirectXMath.h>
 
@@ -65,6 +65,24 @@ Game::Game()
 		//Style
 		ImGui::StyleColorsDark();
 	}
+
+	//Setting constant buffer
+	// Describe the constant buffer
+	D3D11_BUFFER_DESC cbDesc = {}; // Sets struct to all zeros
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	unsigned int size = sizeof(VertexShaderData);
+	size = ((size + 15) / 16) * 16;
+	cbDesc.ByteWidth = size;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	Graphics::Device->CreateBuffer(&cbDesc, 0, &constBuffer);
+
+	Graphics::Context->VSSetConstantBuffers(
+		0, // Which slot (register) to bind the buffer to?
+		1, // How many are we setting right now?
+		&constBuffer);
+
+
 }
 
 
@@ -284,7 +302,10 @@ void Game::BuildUI() {
 		ImGui::InputText("Input", starting, IM_ARRAYSIZE(starting));
 		ImGui::SliderFloat3("Position", positionVector, -10.f, 10.0f);
 	}
-
+	if (ImGui::CollapsingHeader("ConstBuffer")) {
+		ImGui::SliderFloat3("Position Offset", &offset[0],-10.0f,10.0f);
+		ImGui::ColorEdit4("Color Shift", &colorChange[0]);
+	}
 	if (ImGui::CollapsingHeader("Meshes")) {
 		if (ImGui::CollapsingHeader("Mesh: Triangle")) {
 			ImGui::Text("Triangles: %d", baseTriangle->GetIndexCount()/3);
@@ -341,7 +362,14 @@ void Game::Draw(float deltaTime, float totalTime)
 	/// 
 	/// 
 	/// 
-	
+	vsData.colorTint = XMFLOAT4(colorChange[0], colorChange[1], colorChange[2], colorChange[3]);
+	vsData.offset = XMFLOAT3(offset[0], offset[1], offset[2]);
+
+	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	Graphics::Context->Map(constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
+	Graphics::Context->Unmap(constBuffer, 0);
+
 	baseTriangle->Draw();
 	squareTest->Draw();
 	weirdTest->Draw();

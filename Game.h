@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Mesh.h"
+#include "BufferStructs.h"
 
 class Game
 {
@@ -22,10 +23,14 @@ public:
 	void BuildUI();
 private:
 
+	//UI manipulatable
 	float backgroundColor[4];
 	bool showDefault = true;
 	float positionVector[3] = { 0,0,0 };
 	char starting[256] = "Textbox";
+	float colorChange[4] = { 0,0,0,0 };
+	float offset[3] = { 0,0,0 };
+
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders();
 	void CreateGeometry();
@@ -45,5 +50,9 @@ private:
 	std::shared_ptr<Mesh> baseTriangle;
 	std::shared_ptr<Mesh> squareTest;
 	std::shared_ptr<Mesh> weirdTest;
+
+	// Constant Buffers
+	ID3D11Buffer* constBuffer;
+	VertexShaderData vsData;
 };
 

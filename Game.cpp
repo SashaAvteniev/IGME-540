@@ -7,9 +7,10 @@
 #include "Window.h"
 #include "Mesh.h"
 #include "BufferStructs.h"
+#include "GameEntity.h"
 
 #include <DirectXMath.h>
-
+#include<vector>
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3dcompiler.h>
@@ -211,7 +212,10 @@ void Game::CreateGeometry()
 		// - But just to see how it's done...
 		unsigned int indices[] = { 0, 1, 2 };
 
-		baseTriangle = std::make_shared<Mesh>(vertices, sizeof(vertices)/sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]));
+		baseTriangle = std::make_shared<Mesh>(vertices, (int)(sizeof(vertices)/sizeof(vertices[0])), 
+											  indices, (int)(sizeof(indices) / sizeof(indices[0])));
+		GameEntity triangle = GameEntity(*baseTriangle);
+		entities.push_back(triangle);
 	}
 	
 	//Rect
@@ -230,7 +234,12 @@ void Game::CreateGeometry()
 		unsigned int squareIndices[] = { 0,1,2,
 										 0,2,3};
 
-		squareTest = std::make_shared<Mesh>(squareVerteces, sizeof(squareVerteces)/sizeof(squareVerteces[0]), squareIndices, sizeof(squareIndices)/sizeof(squareIndices[0]));
+		squareTest = std::make_shared<Mesh>(squareVerteces, (int)(sizeof(squareVerteces)/sizeof(squareVerteces[0])), 
+											squareIndices, (int)(sizeof(squareIndices)/sizeof(squareIndices[0])));
+		GameEntity squareOne = GameEntity(*squareTest);
+		entities.push_back(squareOne);
+		GameEntity squareTwo = GameEntity(*squareTest);
+		entities.push_back(squareTwo);
 	}
 
 	//WeirdAngle
@@ -249,7 +258,14 @@ void Game::CreateGeometry()
 		unsigned int weirdIndices[] = { 0,1,2,
 										 1,2,3 };
 
-		weirdTest = std::make_shared<Mesh>(weirdVerteces, sizeof(weirdVerteces) / sizeof(weirdVerteces[0]), weirdIndices, sizeof(weirdIndices) / sizeof(weirdIndices[0]));
+		weirdTest = std::make_shared<Mesh>(weirdVerteces, (int)(sizeof(weirdVerteces) / sizeof(weirdVerteces[0])), 
+											weirdIndices, (int)(sizeof(weirdIndices) / sizeof(weirdIndices[0])));
+
+		GameEntity weirdOne = GameEntity(*weirdTest);
+		entities.push_back(weirdOne);
+		GameEntity weirdTwo = GameEntity(*weirdTest);
+		entities.push_back(weirdTwo);
+
 	}
 
 }
@@ -303,8 +319,39 @@ void Game::BuildUI() {
 		ImGui::SliderFloat3("Position", positionVector, -10.f, 10.0f);
 	}
 	if (ImGui::CollapsingHeader("ConstBuffer")) {
-		ImGui::SliderFloat3("Position Offset", &offset[0],-10.0f,10.0f);
 		ImGui::ColorEdit4("Color Shift", &colorChange[0]);
+	}
+	if (ImGui::CollapsingHeader("Entities")) {
+		if (ImGui::CollapsingHeader("Entity 0")) {
+			
+			ImGui::DragFloat3("Position##0", &entities[0].GetTransform()->position.x);
+			ImGui::DragFloat3("Rotation:Radians##0", &entities[0].GetTransform()->rotation.x);
+			ImGui::DragFloat3("Scale##0", &entities[0].GetTransform()->scale.x);
+		}
+		if (ImGui::CollapsingHeader("Entity 1")) {
+
+			ImGui::DragFloat3("Position##1", &entities[1].GetTransform()->position.x);
+			ImGui::DragFloat3("Rotation:Radians##1", &entities[1].GetTransform()->rotation.x);
+			ImGui::DragFloat3("Scale##1", &entities[1].GetTransform()->scale.x);
+		}
+		if (ImGui::CollapsingHeader("Entity 2")) {
+
+			ImGui::DragFloat3("Position##2", &entities[2].GetTransform()->position.x);
+			ImGui::DragFloat3("Rotation:Radians##2", &entities[2].GetTransform()->rotation.x);
+			ImGui::DragFloat3("Scale##2", &entities[2].GetTransform()->scale.x);
+		}
+		if (ImGui::CollapsingHeader("Entity 3")) {
+
+			ImGui::DragFloat3("Position##3", &entities[3].GetTransform()->position.x);
+			ImGui::DragFloat3("Rotation:Radians##3", &entities[3].GetTransform()->rotation.x);
+			ImGui::DragFloat3("Scale##3", &entities[3].GetTransform()->scale.x);
+		}
+		if (ImGui::CollapsingHeader("Entity 4")) {
+
+			ImGui::DragFloat3("Position##4", &entities[4].GetTransform()->position.x);
+			ImGui::DragFloat3("Rotation:Radians##4", &entities[4].GetTransform()->rotation.x);
+			ImGui::DragFloat3("Scale##4", &entities[4].GetTransform()->scale.x);
+		}
 	}
 	if (ImGui::CollapsingHeader("Meshes")) {
 		if (ImGui::CollapsingHeader("Mesh: Triangle")) {
@@ -337,6 +384,14 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::KeyDown(VK_ESCAPE))
 		Window::Quit();
+
+	//Moving objects
+	entities[0].GetTransform()->MoveAbsolute(.1f * deltaTime, 0, 0);
+	entities[1].GetTransform()->Rotate(0, 0, .1f *deltaTime);
+	entities[2].GetTransform()->MoveAbsolute(0, .1f *deltaTime * sin(1 * totalTime), 0);
+	entities[3].GetTransform()->MoveAbsolute(.1f *deltaTime,0,0);
+	entities[4].GetTransform()->Scale(1 + deltaTime * sin(1 * totalTime), 1 + deltaTime * sin(1 * totalTime), 1);
+
 }
 
 
@@ -362,17 +417,24 @@ void Game::Draw(float deltaTime, float totalTime)
 	/// 
 	/// 
 	/// 
-	vsData.colorTint = XMFLOAT4(colorChange[0], colorChange[1], colorChange[2], colorChange[3]);
-	vsData.offset = XMFLOAT3(offset[0], offset[1], offset[2]);
+	/// 
+	
+	for (int i = 0; i < entities.size(); i++) {
+		vsData.colorTint = XMFLOAT4(colorChange[0], colorChange[1], colorChange[2], colorChange[3]);
+		vsData.world = entities[i].objectTransform.world;
+		D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+		Graphics::Context->Map(constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+		memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
+		Graphics::Context->Unmap(constBuffer, 0);
 
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	Graphics::Context->Map(constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
-	Graphics::Context->Unmap(constBuffer, 0);
+		entities[i].GetMesh()->Draw();
+	}
 
-	baseTriangle->Draw();
-	squareTest->Draw();
-	weirdTest->Draw();
+
+	//Old
+
+
+
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)

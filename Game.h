@@ -5,8 +5,10 @@
 #include <memory>
 
 #include "Mesh.h"
+#include "GameEntity.h"
 #include "BufferStructs.h"
 
+#include <vector>
 class Game
 {
 public:
@@ -24,7 +26,7 @@ public:
 private:
 
 	//UI manipulatable
-	float backgroundColor[4];
+	float backgroundColor[4] = { .5,.5,.5,1 };
 	bool showDefault = true;
 	float positionVector[3] = { 0,0,0 };
 	char starting[256] = "Textbox";
@@ -51,6 +53,11 @@ private:
 	std::shared_ptr<Mesh> squareTest;
 	std::shared_ptr<Mesh> weirdTest;
 
+	//GameEntities
+
+	std::vector<GameEntity> entities = {};
+
+	
 	// Constant Buffers
 	ID3D11Buffer* constBuffer;
 	VertexShaderData vsData;

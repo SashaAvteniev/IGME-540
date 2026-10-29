@@ -85,6 +85,39 @@ XMFLOAT4X4 Transform::GetWorldInverseTransposeMatrix() {
 	return worldInverseTranspose;
 }
 
+XMFLOAT3 Transform::GetRight() {
+	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+	XMVECTOR worldRight = XMVectorSet(1, 0, 0, 1);
+
+	XMVECTOR vectorRight = XMVector3Rotate(worldRight, quatRotation);
+	XMFLOAT3 finalRight;
+
+	XMStoreFloat3(&finalRight, vectorRight);
+	return finalRight;
+}
+
+XMFLOAT3 Transform::GetUp() {
+	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+	XMVECTOR worldUp = XMVectorSet(0, 1, 0, 1);
+
+	XMVECTOR vectorUp = XMVector3Rotate(worldUp, quatRotation);
+	XMFLOAT3 finalUp;
+
+	XMStoreFloat3(&finalUp, vectorUp);
+	return finalUp;
+}
+
+XMFLOAT3 Transform::GetForward() {
+	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+	XMVECTOR worldForward = XMVectorSet(1, 0, 0, 1);
+
+	XMVECTOR vectorForward = XMVector3Rotate(worldForward, quatRotation);
+	XMFLOAT3 finalForward;
+
+	XMStoreFloat3(&finalForward, vectorForward);
+	return finalForward;
+}
+
 void Transform::MoveAbsolute(float x, float y, float z) {
 	position.x += x;
 	position.y += y;
@@ -98,6 +131,19 @@ void Transform::MoveAbsolute(XMFLOAT3 offset) {
 	position.z += offset.z;
 
 	GetWorldMatrix();
+}
+
+void Transform::MoveRelative(float x, float y, float z) {
+	XMVECTOR transform = XMVectorSet(x, y, z,1);
+	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x,rotation.y, rotation.z);
+	XMVECTOR rotatedDirection = XMVector3Rotate(transform, quatRotation);
+
+	XMFLOAT3 floatRotatedDirection;
+	XMStoreFloat3(&floatRotatedDirection,rotatedDirection);
+
+	position.x = floatRotatedDirection.x;
+	position.y = floatRotatedDirection.y;
+	position.z = floatRotatedDirection.z;
 }
 
 void Transform::Rotate(float x, float y, float z) {

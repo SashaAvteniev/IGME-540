@@ -1,5 +1,8 @@
 #include "Transform.h"
 
+#include <iostream>
+
+using namespace std;
 using namespace DirectX;
 
 Transform::Transform() {
@@ -87,7 +90,7 @@ XMFLOAT4X4 Transform::GetWorldInverseTransposeMatrix() {
 
 XMFLOAT3 Transform::GetRight() {
 	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
-	XMVECTOR worldRight = XMVectorSet(1, 0, 0, 1);
+	XMVECTOR worldRight = XMVectorSet(1, 0, 0, 0);
 
 	XMVECTOR vectorRight = XMVector3Rotate(worldRight, quatRotation);
 	XMFLOAT3 finalRight;
@@ -98,7 +101,7 @@ XMFLOAT3 Transform::GetRight() {
 
 XMFLOAT3 Transform::GetUp() {
 	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
-	XMVECTOR worldUp = XMVectorSet(0, 1, 0, 1);
+	XMVECTOR worldUp = XMVectorSet(0, 1, 0, 0);
 
 	XMVECTOR vectorUp = XMVector3Rotate(worldUp, quatRotation);
 	XMFLOAT3 finalUp;
@@ -109,11 +112,10 @@ XMFLOAT3 Transform::GetUp() {
 
 XMFLOAT3 Transform::GetForward() {
 	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
-	XMVECTOR worldForward = XMVectorSet(1, 0, 0, 1);
+	XMVECTOR worldForward = XMVectorSet(0, 0, 1, 0);
 
 	XMVECTOR vectorForward = XMVector3Rotate(worldForward, quatRotation);
 	XMFLOAT3 finalForward;
-
 	XMStoreFloat3(&finalForward, vectorForward);
 	return finalForward;
 }
@@ -134,16 +136,31 @@ void Transform::MoveAbsolute(XMFLOAT3 offset) {
 }
 
 void Transform::MoveRelative(float x, float y, float z) {
-	XMVECTOR transform = XMVectorSet(x, y, z,1);
+
+	cout << x << "," << y << "," << z << endl;
+	XMVECTOR transform = XMVectorSet(x, y, z, 0);
 	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x,rotation.y, rotation.z);
 	XMVECTOR rotatedDirection = XMVector3Rotate(transform, quatRotation);
 
 	XMFLOAT3 floatRotatedDirection;
 	XMStoreFloat3(&floatRotatedDirection,rotatedDirection);
 
-	position.x = floatRotatedDirection.x;
-	position.y = floatRotatedDirection.y;
-	position.z = floatRotatedDirection.z;
+	position.x += floatRotatedDirection.x;
+	position.y += floatRotatedDirection.y;
+	position.z += floatRotatedDirection.z;
+}
+
+void Transform::MoveRelative(XMFLOAT3 offset) {
+	XMVECTOR transform = XMVectorSet(offset.x, offset.y, offset.z,  0);
+	XMVECTOR quatRotation = XMQuaternionRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+	XMVECTOR rotatedDirection = XMVector3Rotate(transform, quatRotation);
+
+	XMFLOAT3 floatRotatedDirection;
+	XMStoreFloat3(&floatRotatedDirection, rotatedDirection);
+
+	position.x += floatRotatedDirection.x;
+	position.y += floatRotatedDirection.y;
+	position.z += floatRotatedDirection.z;
 }
 
 void Transform::Rotate(float x, float y, float z) {

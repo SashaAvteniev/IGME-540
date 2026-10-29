@@ -83,6 +83,9 @@ Game::Game()
 		1, // How many are we setting right now?
 		&constBuffer);
 
+	//Camera setup
+	XMFLOAT3 startingPosition = { 0,0,10.0f };
+	mainCamera = std::make_shared<Camera>(Window::AspectRatio(),startingPosition, 90, .01f, 1000, 1,.01,false);
 
 }
 
@@ -277,7 +280,9 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
-	
+	if (mainCamera != nullptr) {
+		mainCamera->UpdateProjectionMatrix(Window::AspectRatio());
+	}
 }
 
 void ImGUIUpdate(float deltaTime)
@@ -392,6 +397,7 @@ void Game::Update(float deltaTime, float totalTime)
 	entities[3].GetTransform()->MoveAbsolute(.1f *deltaTime,0,0);
 	entities[4].GetTransform()->Scale(1 + deltaTime * sin(1 * totalTime), 1 + deltaTime * sin(1 * totalTime), 1);
 
+	mainCamera->Update(deltaTime);
 }
 
 
@@ -422,6 +428,9 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (int i = 0; i < entities.size(); i++) {
 		vsData.colorTint = XMFLOAT4(colorChange[0], colorChange[1], colorChange[2], colorChange[3]);
 		vsData.world = entities[i].objectTransform.world;
+		vsData.viewMatrix = mainCamera->GetViewMatrix();
+		vsData.projectionMatrix = mainCamera->GetProjectionMatrix();
+
 		D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 		Graphics::Context->Map(constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
 		memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));

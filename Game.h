@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "GameEntity.h"
 #include "BufferStructs.h"
+#include "Camera.h"
 
 #include <vector>
 class Game
@@ -61,5 +62,8 @@ private:
 	// Constant Buffers
 	ID3D11Buffer* constBuffer;
 	VertexShaderData vsData;
+
+	//Camera
+	std::shared_ptr<Camera> mainCamera;
 };
 

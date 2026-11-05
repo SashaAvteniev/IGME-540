@@ -84,7 +84,7 @@ Game::Game()
 		&constBuffer);
 
 	//Camera setup
-	XMFLOAT3 startingPosition = { 0,0,10.0f };
+	XMFLOAT3 startingPosition = { 0,0,-10.0f };
 	mainCamera = std::make_shared<Camera>(Window::AspectRatio(),startingPosition, 90, .01f, 1000, 1,.01,false);
 
 }

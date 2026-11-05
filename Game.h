@@ -64,6 +64,7 @@ private:
 	VertexShaderData vsData;
 
 	//Camera
-	std::shared_ptr<Camera> mainCamera;
+	std::vector<std::shared_ptr<Camera>> cameras;
+	std::shared_ptr<Camera> currentCamera;
 };
 

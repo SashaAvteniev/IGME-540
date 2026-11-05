@@ -84,9 +84,15 @@ Game::Game()
 		&constBuffer);
 
 	//Camera setup
-	XMFLOAT3 startingPosition = { 0,0,-10.0f };
-	mainCamera = std::make_shared<Camera>(Window::AspectRatio(),startingPosition, 90, .01f, 1000, 1,.01,false);
+	XMFLOAT3 startingPositionMain = { 0,0,-1.0f };
+	XMFLOAT3 startingPositionAlt = { 0,0,-10.0f };
+	std::shared_ptr<Camera> mainCamera = std::make_shared<Camera>(Window::AspectRatio(),startingPositionMain, 90, .01f, 1000, 1,.01,true);
+	std::shared_ptr<Camera> altCamera = std::make_shared<Camera>(Window::AspectRatio(), startingPositionAlt, 45, .01f, 150, 1, .01, true);
 
+	cameras.push_back(mainCamera);
+	cameras.push_back(altCamera);
+
+	currentCamera = cameras[0];
 }
 
 
@@ -280,8 +286,8 @@ void Game::CreateGeometry()
 // --------------------------------------------------------
 void Game::OnResize()
 {
-	if (mainCamera != nullptr) {
-		mainCamera->UpdateProjectionMatrix(Window::AspectRatio());
+	for (unsigned int i = 0; i < cameras.size(); i++) {
+		cameras[i]->UpdateProjectionMatrix(Window::AspectRatio());
 	}
 }
 
@@ -375,6 +381,15 @@ void Game::BuildUI() {
 			ImGui::Text("Indices:   %d", weirdTest->GetIndexCount());
 		}
 	}
+
+	if (ImGui::CollapsingHeader("Cameras")) {
+		if (ImGui::Button("Camera One")) {
+			currentCamera = cameras[0];
+		}
+		if (ImGui::Button("Camera Two")) {
+			currentCamera = cameras[1];
+		}
+	}
 	ImGui:: End();
 	
 
@@ -397,7 +412,7 @@ void Game::Update(float deltaTime, float totalTime)
 	entities[3].GetTransform()->MoveAbsolute(.1f *deltaTime,0,0);
 	entities[4].GetTransform()->Scale(1 + deltaTime * sin(1 * totalTime), 1 + deltaTime * sin(1 * totalTime), 1);
 
-	mainCamera->Update(deltaTime);
+	currentCamera->Update(deltaTime);
 }
 
 
@@ -428,8 +443,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (int i = 0; i < entities.size(); i++) {
 		vsData.colorTint = XMFLOAT4(colorChange[0], colorChange[1], colorChange[2], colorChange[3]);
 		vsData.world = entities[i].objectTransform.world;
-		vsData.viewMatrix = mainCamera->GetViewMatrix();
-		vsData.projectionMatrix = mainCamera->GetProjectionMatrix();
+		vsData.viewMatrix = currentCamera->GetViewMatrix();
+		vsData.projectionMatrix = currentCamera->GetProjectionMatrix();
 
 		D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 		Graphics::Context->Map(constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);

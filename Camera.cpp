@@ -36,18 +36,16 @@ DirectX::XMFLOAT4X4 Camera::GetProjectionMatrix()
 
 void Camera::UpdateProjectionMatrix(float aspectRatioGiven)
 {
-	XMMATRIX matrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOVAngle), aspectRatioGiven, nearClip, farClip);
-	XMStoreFloat4x4(&projectionMatrix, matrix);
-	/*
-		if (perspective) {
-		XMMATRIX matrix = XMMatrixPerspectiveFovLH(FOVAngle, aspectRatio, nearClip, farClip);
+	
+	if (perspective) {
+		XMMATRIX matrix = XMMatrixPerspectiveFovLH(FOVAngle, aspectRatioGiven, nearClip, farClip);
 		XMStoreFloat4x4(&projectionMatrix, matrix);
 	}
 	else {
 		XMMATRIX matrix = XMMatrixOrthographicLH(100, 100, nearClip, farClip);
 		XMStoreFloat4x4(&projectionMatrix, matrix);
 	}
-	*/
+	
 
 }
 
